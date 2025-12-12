@@ -44,7 +44,7 @@ function App() {
       const parsed = result.data as WebsiteItem[];
 
       // Load click counts from localStorage
-      const clicks = JSON.parse(localStorage.getItem('bodacious-clicks') || '{}');
+      const clicks = JSON.parse(localStorage.getItem('fun-site-clicks') || '{}');
       const itemsWithClicks = parsed.map(item => ({
         ...item,
         clicks: clicks[item.url] || 0
@@ -66,9 +66,9 @@ function App() {
 
   const handleClick = (url: string) => {
     // Track click
-    const clicks = JSON.parse(localStorage.getItem('bodacious-clicks') || '{}');
+    const clicks = JSON.parse(localStorage.getItem('fun-site-clicks') || '{}');
     clicks[url] = (clicks[url] || 0) + 1;
-    localStorage.setItem('bodacious-clicks', JSON.stringify(clicks));
+    localStorage.setItem('fun-site-clicks', JSON.stringify(clicks));
 
     // Update state
     setItems(prev => prev.map(item =>
@@ -298,7 +298,7 @@ function App() {
             <div className="inline-flex items-center justify-center">
               <Globe className="w-16 h-16 text-orange-500 animate-spin retro-globe" strokeWidth={1.5} />
             </div>
-            <p className="text-gray-500 mt-6 font-medium animate-pulse">Loading bodacious sites...</p>
+            <p className="text-gray-500 mt-6 font-medium animate-pulse">Loading fun sites...</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -377,7 +377,7 @@ function App() {
             </div>
             <div className="space-y-4 text-gray-600">
               <p>
-                <strong className="text-gray-900">BODACIOUS.WEBSITE</strong> is a carefully curated collection of fun, goofy, and creative websites that spark joy and curiosity.
+                <strong className="text-gray-900">Fun Websites for Kids</strong> is a carefully curated collection of fun, goofy, and creative websites that spark joy and curiosity.
               </p>
               <p>
                 This was whipped up by <a href="https://www.shaz.fun" target="_blank" rel="noopener noreferrer" className="text-orange-600 hover:text-orange-700 font-medium">www.shaz.fun</a>, based on how much his wacky kids loved the first few Google Chrome Experiments he showed them. Better than the iPad screen.
