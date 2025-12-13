@@ -1,6 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1mj5HP-67nI9I7JEYTnPEPBOaAavZYFLlbjLyYD-VlMI/export?format=csv&gid=0';
+import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,29 +16,23 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const response = await fetch(SHEET_CSV_URL);
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     
-    if (!response.ok) {
-      throw new Error(`Failed to fetch sheet: ${response.status}`);
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const { data, error } = await supabase
+      .from('websites')
+      .select('description, url, clicks')
+      .eq('is_active', true)
+      .order('order_index', { ascending: false });
+
+    if (error) {
+      throw error;
     }
 
-    const text = await response.text();
-    const rows = text.split('\n').filter(row => row.trim());
-
-    const parsed = rows.slice(1).map(row => {
-      const matches = row.match(/(".*?"|[^,]+)(?:,|$)/g);
-      if (!matches || matches.length < 2) return null;
-
-      const description = matches[0].replace(/,$/, '').replace(/^"|"$/g, '').trim();
-      const url = matches[1].replace(/,$/, '').replace(/^"|"$/g, '').trim();
-
-      if (!description || !url) return null;
-
-      return { description, url };
-    }).filter(Boolean);
-
     return new Response(
-      JSON.stringify({ success: true, data: parsed }),
+      JSON.stringify({ success: true, data: data || [] }),
       {
         headers: {
           ...corsHeaders,
