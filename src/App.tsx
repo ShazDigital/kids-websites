@@ -33,7 +33,12 @@ function App() {
     setError(false);
 
     try {
-      const response = await fetch(EDGE_FUNCTION_URL);
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      });
       if (!response.ok) throw new Error('Failed to fetch');
 
       const result = await response.json();
