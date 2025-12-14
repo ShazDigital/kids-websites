@@ -31,13 +31,19 @@ function App() {
     setError(false);
 
     try {
-      const response = await fetch(EDGE_FUNCTION_URL, {
+      const timestamp = Date.now();
+      const response = await fetch(`${EDGE_FUNCTION_URL}?t=${timestamp}`, {
         cache: 'no-store',
         headers: {
-          'Cache-Control': 'no-cache',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
         },
       });
-      if (!response.ok) throw new Error('Failed to fetch');
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const result = await response.json();
 
