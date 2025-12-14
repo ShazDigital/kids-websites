@@ -11,21 +11,25 @@ const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1mj5HP-67nI9I7J
 function parseCSV(csv: string): Array<{ description: string; url: string }> {
   const lines = csv.trim().split('\n');
   const result: Array<{ description: string; url: string }> = [];
-  
+
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
-    
-    const parts = line.split(',').map(part => part.trim().replace(/^"|"$/g, ''));
-    
-    if (parts.length >= 2 && parts[0] && parts[1]) {
+
+    const firstCommaIndex = line.indexOf(',');
+    if (firstCommaIndex === -1) continue;
+
+    const description = line.substring(0, firstCommaIndex).trim().replace(/^"|"$/g, '');
+    const url = line.substring(firstCommaIndex + 1).trim().replace(/^"|"$/g, '');
+
+    if (description && url) {
       result.push({
-        description: parts[0],
-        url: parts[1]
+        description,
+        url
       });
     }
   }
-  
+
   return result;
 }
 

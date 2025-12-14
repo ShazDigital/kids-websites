@@ -6,11 +6,9 @@ const EDGE_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fet
 
 // Fallback sample data if sheet fails to load
 const FALLBACK_DATA = [
-  { description: 'Fly a plane in your browser', url: 'geo-fs.com' },
-  { description: 'Draw with physics and gravity', url: 'physicssketchpad.com' },
-  { description: 'Make music with falling sand', url: 'sandspiel.club' },
-  { description: 'Play with virtual slime', url: 'slime-simulator.com' },
-  { description: 'Explore a weird virtual museum', url: 'savethesounds.info' }
+  { description: 'Flight Simulator', url: 'https://www.geo-fs.com/geofs.php?v=3.9' },
+  { description: 'Image Training', url: 'https://teachablemachine.withgoogle.com/' },
+  { description: 'Word Synth Music', url: 'https://creatability.withgoogle.com/word-synth/' }
 ];
 
 type WebsiteItem = {
