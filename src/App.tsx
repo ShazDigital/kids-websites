@@ -26,6 +26,7 @@ function App() {
   const [showAbout, setShowAbout] = useState(false);
   const [sortByClicks, setSortByClicks] = useState(false);
   const [partyMode, setPartyMode] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -62,6 +63,18 @@ function App() {
 
   useEffect(() => {
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleClick = (url: string) => {
@@ -174,8 +187,22 @@ function App() {
     ? [...items].sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
     : items;
 
+  const getBackgroundStyle = () => {
+    const hue1 = 210 + (scrollProgress * 0.3);
+    const hue2 = 180 + (scrollProgress * 0.5);
+    const hue3 = 280 + (scrollProgress * 0.4);
+
+    return {
+      background: `linear-gradient(135deg,
+        hsl(${hue1}, 25%, 96%) 0%,
+        hsl(${hue2}, 20%, 98%) 50%,
+        hsl(${hue3}, 22%, 95%) 100%)`,
+      transition: 'background 0.3s ease-out'
+    };
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 relative overflow-x-hidden">
+    <div className="min-h-screen relative overflow-x-hidden" style={getBackgroundStyle()}>
       {/* Tron grid background */}
       <div className="tron-grid pointer-events-none fixed inset-0 z-0" />
 
