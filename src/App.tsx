@@ -1,15 +1,10 @@
 import { useState, useEffect } from 'react';
 import { RefreshCw, X, Star, Globe } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
 
-// Edge function URL for fetching Google Sheet data
-const EDGE_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-websites`;
-
-// Fallback sample data if sheet fails to load
-const FALLBACK_DATA = [
-  { description: 'Flight Simulator', url: 'https://www.geo-fs.com/geofs.php?v=3.9' },
-  { description: 'Image Training', url: 'https://teachablemachine.withgoogle.com/' },
-  { description: 'Word Synth Music', url: 'https://creatability.withgoogle.com/word-synth/' }
-];
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 type WebsiteItem = {
   description: string;
@@ -31,27 +26,15 @@ function App() {
     setError(false);
 
     try {
-      const timestamp = Date.now();
-      const response = await fetch(`${EDGE_FUNCTION_URL}?t=${timestamp}`, {
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
-        },
-      });
+      const { data, error: dbError } = await supabase
+        .from('websites')
+        .select('description, url')
+        .eq('is_active', true)
+        .order('order_index', { ascending: false });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (dbError) throw dbError;
 
-      const result = await response.json();
-
-      if (!result.success || !result.data) {
-        throw new Error('Invalid response from server');
-      }
-
-      const parsed = result.data as WebsiteItem[];
+      const parsed = data as WebsiteItem[];
 
       // Load click counts from localStorage
       const clicks = JSON.parse(localStorage.getItem('fun-site-clicks') || '{}');
@@ -60,11 +43,11 @@ function App() {
         clicks: clicks[item.url] || 0
       }));
 
-      setItems(itemsWithClicks.reverse()); // Newest first
+      setItems(itemsWithClicks);
     } catch (err) {
-      console.error('Failed to load sheet:', err);
+      console.error('Failed to load websites:', err);
       setError(true);
-      setItems(FALLBACK_DATA);
+      setItems([]);
     } finally {
       setIsLoading(false);
     }
@@ -296,7 +279,7 @@ function App() {
         <div className="max-w-4xl mx-auto px-4 mb-6 relative z-10">
           <div className="bg-yellow-50 border-2 border-yellow-200 p-4 text-center">
             <p className="text-yellow-800 text-sm">
-              ⚠️ Using sample links (sheet unreachable)
+              ⚠️ Failed to load websites
             </p>
           </div>
         </div>
@@ -382,6 +365,13 @@ function App() {
               About
             </button>
             <span className="text-gray-300">•</span>
+            <a
+              href="/admin"
+              className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              admin
+            </a>
+            <span className="text-gray-300">•</span>
             <p className="text-xs text-gray-400">
               Made with ✨ for curious minds
             </p>
@@ -422,7 +412,7 @@ function App() {
                 Send ideas to <a href="mailto:shaz@thesupply.com" className="text-orange-600 hover:text-orange-700 font-medium">shaz@thesupply.com</a>
               </p>
               <p className="text-sm text-gray-400 pt-4 border-t border-gray-200">
-                This gallery is powered by a simple Google Sheet, making it easy to add new discoveries as we find them.
+                This gallery is powered by a Supabase database, making it easy to add new discoveries as we find them.
               </p>
             </div>
             <button
